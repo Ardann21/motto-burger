@@ -398,7 +398,7 @@ export default function Home() {
       </section>
 
       {/* The Collective: Values & Heritage Bento Grid */}
-      <section className="relative z-10 bg-black py-16 md:py-48 px-6 overflow-hidden -mt-20 md:mt-0">
+      <section className="relative z-10 bg-black py-16 md:py-48 px-6 overflow-hidden md:mt-0">
         <motion.div
           initial={{ opacity: 0, y: 50 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -544,7 +544,7 @@ export default function Home() {
                   <p className="hidden md:block text-pearl/40 text-sm max-w-[240px] italic leading-relaxed opacity-0 group-hover:opacity-100 transition-opacity duration-700">
                     {loc.desc}
                   </p>
-                  <ArrowRight className="w-8 h-8 text-accent group-hover:text-accent transform group-hover:translate-x-4 transition-all duration-700" />
+                  <ArrowRight className="w-8 h-8 text-accent" />
                 </div>
               </motion.div>
             ))}
