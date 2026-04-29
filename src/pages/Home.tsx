@@ -364,7 +364,7 @@ export default function Home() {
             </div>
           )}
 
-          <div className="relative w-full md:max-w-[85%] h-screen flex items-center justify-center overflow-hidden -translate-y-[15%] md:translate-y-0">
+          <div className="relative w-full md:max-w-[85%] h-screen flex items-center justify-center overflow-hidden -translate-y-[10%] md:translate-y-0">
             <canvas
               ref={canvasRef}
               className="w-full h-full object-contain scale-[2.0] translate-x-[10%] md:translate-x-0 md:scale-100 object-center origin-center"
