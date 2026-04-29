@@ -1,0 +1,54 @@
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Inter:wght@300;400;500;600&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --font-serif: "Playfair Display", serif;
+  --font-sans: "Inter", sans-serif;
+  --color-obsidian: #000000;
+  --color-charcoal: #121212;
+  --color-pearl: #F5F5F5;
+  --color-accent: #D35400;
+  --color-muted: #8E8E8E;
+}
+
+@layer base {
+  body {
+    @apply bg-obsidian text-pearl font-sans selection:bg-accent selection:text-pearl antialiased;
+    overflow-x: hidden;
+  }
+}
+
+@layer utilities {
+  .scrollbar-none {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+  .scrollbar-none::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+.glass-nav {
+  @apply backdrop-blur-xl bg-obsidian/40 border-b border-pearl/5;
+}
+
+.action-zone {
+  @apply relative w-full h-[220vh] flex flex-col items-center;
+}
+
+.canvas-container {
+  @apply sticky top-0 w-full h-screen flex items-start justify-center overflow-hidden z-0;
+}
+
+@keyframes scroll-line {
+  0% { transform: scaleY(0); transform-origin: top; }
+  50% { transform: scaleY(1); transform-origin: top; }
+  51% { transform: scaleY(1); transform-origin: bottom; }
+  100% { transform: scaleY(0); transform-origin: bottom; }
+}
+
+.scroll-line::after {
+  content: '';
+  @apply absolute top-0 left-1/2 -translate-x-1/2 w-[2px] h-24 bg-accent;
+  animation: scroll-line 2.5s infinite cubic-bezier(0.76, 0, 0.24, 1);
+}
