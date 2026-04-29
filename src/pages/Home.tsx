@@ -398,7 +398,7 @@ export default function Home() {
       </section>
 
       {/* The Collective: Values & Heritage Bento Grid */}
-      <section className="relative z-10 bg-black py-16 md:py-48 px-6 overflow-hidden mt-16 md:mt-0">
+      <section className="relative z-10 bg-black py-16 md:py-48 px-6 overflow-hidden mt-12 md:mt-0">
         <motion.div
           initial={{ opacity: 0, y: 50 }}
           whileInView={{ opacity: 1, y: 0 }}
