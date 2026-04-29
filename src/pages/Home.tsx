@@ -269,10 +269,11 @@ export default function Home() {
   // Update canvas on scroll
   useEffect(() => {
     const unsubscribe = scrollYProgress.on("change", (latest) => {
-      if (imagesLoaded) {
+      if (imagesLoaded && imagesRef.current.length > 0) {
+        const maxIndex = imagesRef.current.length - 1;
         const frameIndex = Math.min(
-          FRAME_COUNT - 1,
-          Math.floor(Math.min(latest * 1.5, 1) * FRAME_COUNT)
+          maxIndex,
+          Math.floor(Math.min(latest * 1.5, 1) * imagesRef.current.length)
         );
         renderFrame(frameIndex);
       }
@@ -283,10 +284,11 @@ export default function Home() {
 
   useEffect(() => {
     const unsubscribe = friesProgress.on("change", (latest) => {
-      if (friesLoaded) {
+      if (friesLoaded && friesImagesRef.current.length > 0) {
+        const maxIndex = friesImagesRef.current.length - 1;
         const frameIndex = Math.min(
-          FRIES_FRAME_COUNT - 1,
-          Math.floor(latest * FRIES_FRAME_COUNT)
+          maxIndex,
+          Math.floor(latest * friesImagesRef.current.length)
         );
         renderFriesFrame(frameIndex);
       }
