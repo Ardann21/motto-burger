@@ -152,75 +152,50 @@ export default function Home() {
     target: friesContainerRef,
     offset: ["start 80%", "end end"]
   });
-  // Preload images — prioritize hamburger (above fold), defer fries until visible
+  // Preload images — all frames load concurrently, browser manages connections
   useEffect(() => {
-    const loadImage = (src: string): Promise<HTMLImageElement> => {
-      return new Promise((resolve) => {
-        const img = new Image();
-        img.src = src;
-        img.onload = () => resolve(img);
-        img.onerror = () => resolve(img);
-      });
-    };
+    // Load hamburger frames — all at once for fastest possible loading
+    const hamburgerImages: HTMLImageElement[] = new Array(FRAME_COUNT);
+    let hamburgerLoadedCount = 0;
 
-    // Load images in concurrent batches to avoid network congestion
-    const loadBatch = async (srcs: string[], batchSize = 6): Promise<HTMLImageElement[]> => {
-      const results: HTMLImageElement[] = [];
-      for (let i = 0; i < srcs.length; i += batchSize) {
-        const batch = srcs.slice(i, i + batchSize);
-        const loaded = await Promise.all(batch.map(src => loadImage(src)));
-        results.push(...loaded);
-      }
-      return results;
-    };
-
-    const preloadHamburger = async () => {
-      // Load first frame immediately for instant visual
-      const firstSrc = '/hamburger/00001.jpg';
-      const firstFrame = await loadImage(firstSrc);
-      imagesRef.current = [firstFrame];
-      renderFrame(0);
-      setImagesLoaded(true);
-
-      // Load remaining frames in batches of 6
-      const remainingSrcs: string[] = [];
-      for (let i = 2; i <= FRAME_COUNT; i++) {
-        remainingSrcs.push(`/hamburger/${i.toString().padStart(5, '0')}.jpg`);
-      }
-      const remaining = await loadBatch(remainingSrcs);
-      imagesRef.current = [firstFrame, ...remaining];
-    };
-
-    preloadHamburger();
-
-    // Defer fries loading until user scrolls near the section
-    if (friesContainerRef.current) {
-      const observer = new IntersectionObserver(
-        (entries) => {
-          if (entries[0].isIntersecting) {
-            observer.disconnect();
-            loadFries();
-          }
-        },
-        { rootMargin: '500px' } // Start loading 500px before section enters viewport
-      );
-      observer.observe(friesContainerRef.current);
-
-      const loadFries = async () => {
-        const firstFrame = await loadImage('/fries/00001.jpg');
-        friesImagesRef.current = [firstFrame];
-        setFriesLoaded(true);
-
-        const remainingSrcs: string[] = [];
-        for (let i = 2; i <= FRIES_FRAME_COUNT; i++) {
-          remainingSrcs.push(`/fries/${i.toString().padStart(5, '0')}.jpg`);
+    for (let i = 0; i < FRAME_COUNT; i++) {
+      const img = new Image();
+      const frameNumber = (i + 1).toString().padStart(5, '0');
+      img.src = `/hamburger/${frameNumber}.jpg`;
+      img.onload = () => {
+        hamburgerImages[i] = img;
+        hamburgerLoadedCount++;
+        // Show first frame immediately
+        if (i === 0) {
+          imagesRef.current = hamburgerImages;
+          renderFrame(0);
+          setImagesLoaded(true);
         }
-        const remaining = await loadBatch(remainingSrcs);
-        friesImagesRef.current = [firstFrame, ...remaining];
       };
-
-      return () => observer.disconnect();
+      img.onerror = () => {
+        hamburgerLoadedCount++;
+      };
     }
+
+    imagesRef.current = hamburgerImages;
+
+    // Load fries frames — all at once
+    const friesImages: HTMLImageElement[] = new Array(FRIES_FRAME_COUNT);
+
+    for (let i = 0; i < FRIES_FRAME_COUNT; i++) {
+      const img = new Image();
+      const frameNumber = (i + 1).toString().padStart(5, '0');
+      img.src = `/fries/${frameNumber}.jpg`;
+      img.onload = () => {
+        friesImages[i] = img;
+        if (i === 0) {
+          friesImagesRef.current = friesImages;
+          setFriesLoaded(true);
+        }
+      };
+    }
+
+    friesImagesRef.current = friesImages;
   }, []);
 
   const renderFrame = (index: number) => {
@@ -269,13 +244,23 @@ export default function Home() {
   // Update canvas on scroll
   useEffect(() => {
     const unsubscribe = scrollYProgress.on("change", (latest) => {
-      if (imagesLoaded && imagesRef.current.length > 0) {
-        const maxIndex = imagesRef.current.length - 1;
+      if (imagesLoaded) {
         const frameIndex = Math.min(
-          maxIndex,
-          Math.floor(Math.min(latest * 1.5, 1) * imagesRef.current.length)
+          FRAME_COUNT - 1,
+          Math.floor(Math.min(latest * 1.5, 1) * FRAME_COUNT)
         );
-        renderFrame(frameIndex);
+        // If target frame isn't loaded yet, find nearest loaded frame
+        if (imagesRef.current[frameIndex]) {
+          renderFrame(frameIndex);
+        } else {
+          // Search backwards for nearest loaded frame
+          for (let j = frameIndex - 1; j >= 0; j--) {
+            if (imagesRef.current[j]) {
+              renderFrame(j);
+              break;
+            }
+          }
+        }
       }
     });
 
@@ -284,13 +269,21 @@ export default function Home() {
 
   useEffect(() => {
     const unsubscribe = friesProgress.on("change", (latest) => {
-      if (friesLoaded && friesImagesRef.current.length > 0) {
-        const maxIndex = friesImagesRef.current.length - 1;
+      if (friesLoaded) {
         const frameIndex = Math.min(
-          maxIndex,
-          Math.floor(latest * friesImagesRef.current.length)
+          FRIES_FRAME_COUNT - 1,
+          Math.floor(latest * FRIES_FRAME_COUNT)
         );
-        renderFriesFrame(frameIndex);
+        if (friesImagesRef.current[frameIndex]) {
+          renderFriesFrame(frameIndex);
+        } else {
+          for (let j = frameIndex - 1; j >= 0; j--) {
+            if (friesImagesRef.current[j]) {
+              renderFriesFrame(j);
+              break;
+            }
+          }
+        }
       }
     });
 
