@@ -544,7 +544,7 @@ export default function Home() {
                   <p className="hidden md:block text-pearl/40 text-sm max-w-[240px] italic leading-relaxed opacity-0 group-hover:opacity-100 transition-opacity duration-700">
                     {loc.desc}
                   </p>
-                  <ArrowRight className="w-8 h-8 text-white/5 group-hover:text-accent transform group-hover:translate-x-4 transition-all duration-700" />
+                  <ArrowRight className="w-8 h-8 text-accent group-hover:text-accent transform group-hover:translate-x-4 transition-all duration-700" />
                 </div>
               </motion.div>
             ))}
